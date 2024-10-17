@@ -35,8 +35,8 @@ void img_pixel_set(uint8_t *img, int rol, int col, uint8_t color)
     //计算索引
     int index = rol + col * 124;
     int byte_index = index / 4;
-    // int bit_offset = (index % 4) * 2;
-    int bit_offset = 0;
+    int bit_offset = 6 - (index % 4) * 2;
+    // int bit_offset = 0;
     
     //设定颜色
     img[byte_index] &= ~(0x03 << bit_offset);
@@ -69,7 +69,7 @@ void setup() {
 
   /*画一个y=x的线*/
   for(int i=0; i<124; i++){
-    img_pixel_set(IMG_buffer, i, i*2, PIXEL_RED);
+    img_pixel_set(IMG_buffer, i, i, PIXEL_RED);
   }
 
   // IMG_buffer[50] = pixel_vel << 6 | pixel_vel << 4 | pixel_vel << 2 | pixel_vel;
