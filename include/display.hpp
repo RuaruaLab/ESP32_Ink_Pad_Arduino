@@ -1,3 +1,6 @@
+#include "EPD_2in13g.h"
+#include "imagedata.h"
+
 #ifndef EPAPER_DISPLAY_HPP
 #define EPAPER_DISPLAY_HPP
 
@@ -35,6 +38,7 @@ public:
         }
     }
 
+    //设置像素
     void setPixel(int row, int col, PixelColor color) {
         if (row < 0 || row >= ROWS || col < 0 || col >= COLS) {
             return; // 越界检查
@@ -54,8 +58,14 @@ public:
         }
     }
 
+    //刷新成缓冲区内的图像
     void refreshScreen() {
         epd.Display(img_buffer);
+    }
+
+    //直接通过图像刷新屏幕
+    void set(const UBYTE *Image){
+        epd.Display(Image);
     }
 
     void sleep() {
