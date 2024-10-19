@@ -1,9 +1,3 @@
-#include <Arduino.h>
-#include "PINOUT.h"
-#include "EPD_2in13g.h"
-
-uint8_t IMG_buffer[7750]; // 全局定义图片缓冲区
-
 class EPaperDisplay {
 private:
     Epd epd;
@@ -62,18 +56,3 @@ public:
         epd.Sleep();
     }
 };
-
-EPaperDisplay display(IMG_buffer); // 在外部定义
-void setup() {
-    display.begin(); // 在合适的位置调用初始化函数
-
-    display.clearScreen(EPaperDisplay::PIXEL_WHITE);
-
-    for(int i = 0; i < 124; i++) {
-        display.setPixel(i, i, EPaperDisplay::PIXEL_RED);
-    }
-    display.refreshScreen();
-}
-
-void loop() {
-}
