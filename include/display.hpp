@@ -1,3 +1,6 @@
+#ifndef EPAPER_DISPLAY_HPP
+#define EPAPER_DISPLAY_HPP
+
 class EPaperDisplay {
 private:
     Epd epd;
@@ -19,7 +22,7 @@ public:
 
     // 显式初始化函数
     void begin() {
-        memset(img_buffer, 0xFF, sizeof(IMG_buffer)); // 初始化为全白
+        memset(img_buffer, 0xFF, sizeof(img_buffer)); // 初始化为全白
         if (epd.Init() != 0) {
             Serial.begin(9600);
             Serial.println("e-Paper init failed!");
@@ -43,7 +46,7 @@ public:
 
     void clearScreen(PixelColor color = PIXEL_WHITE) {
         uint8_t packedColor = (color << 6) | (color << 4) | (color << 2) | color;
-        for (int i = 0; i < sizeof(IMG_buffer); i++) {
+        for (int i = 0; i < sizeof(img_buffer); i++) {
             img_buffer[i] = packedColor;
         }
     }
@@ -56,3 +59,9 @@ public:
         epd.Sleep();
     }
 };
+
+/*墨水屏接口*/
+uint8_t IMG_buffer[7750];            //图片缓冲区
+EPaperDisplay display(IMG_buffer);   //显示控制类
+
+#endif
