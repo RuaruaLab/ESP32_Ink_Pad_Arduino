@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-extern const unsigned char gImage_2in13g[];
+extern unsigned char gImage_2in13g[];
 
 /* FILE END */
 

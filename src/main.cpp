@@ -70,6 +70,7 @@ void loop() {
 
       uint8_t data_length = 0;
       data_length = Serial.read();
+      printf("length = %d\n", data_length);
       Serial.readBytes(recive_buff, data_length);
       if(recive_buff[data_length-1] == 0x7A)
       {
@@ -77,7 +78,7 @@ void loop() {
       }
     }
   }
-
+  printf("no data sent\n");
   // printf("main task ok\n");
   delay(1);
   
@@ -85,6 +86,27 @@ void loop() {
 
 void serial_ubpack(uint8_t *pack)
 {
-  printf("%s\n", pack);
+  switch (pack[0])
+  {
+  case 0x01:
+  {
+    int frame_id = pack[1]; //当前帧id
+    for(int i=0; i<64; i++) gImage_2in13g[frame_id*64 + i] = pack[i + 2];
+    if(frame_id >= 0x79)
+    {
+      display.set(gImage_2in13g);
+      // 调试flag
+      // while(1){
+      //   printf("called refresh!\n");
+      // }
+    }
+    break;
+  }
+
+  
+  default:
+    break;
+  }
+  
   return ;
 }
