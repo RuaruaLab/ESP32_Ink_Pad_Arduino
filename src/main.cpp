@@ -3,7 +3,7 @@
 #include "display.hpp"
 #include "esp_partition.h"
 #include "spi_flash_mmap.h"
-
+#include "sensor.hpp"
 
 uint8_t recive_buff[256] = {0};
 
@@ -40,6 +40,9 @@ void setup() {
 
     //从flash中读取图片
     flash_read(gImage_2in13g);
+
+    //启动状态更新线程
+    xTaskCreate(sensor_update_task, "sensor update task", 2048, NULL, 1, NULL);
 }
 
 void loop() {
@@ -47,7 +50,7 @@ void loop() {
 
   check_usb_status();
   check_serial_data();
-  delay(1);
+  vTaskDelay(1);
   
 }
 
