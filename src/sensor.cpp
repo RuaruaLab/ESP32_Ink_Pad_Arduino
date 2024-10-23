@@ -1,22 +1,27 @@
 #include "sensor.hpp"
 #include "SensirionI2cSht4x.h"
-
+#include "imagedata.h"
 
 DHT40 dht40;
 
 
 void sensor_update_task(void *pvParameters)
 {
-    dht40.init();
-    display.drawString(10, 50, "0123456789%\t", display.PIXEL_YELLOW);
-    display.drawString(10, 30, "RuaRuaLab", display.PIXEL_RED);
-    display.drawString(10, 10, "Fish - SK - Mind", display.PIXEL_BLACK);
-    display.refreshScreen();
+    dht40.init();                               //初始化温湿度计
+    memcpy(IMG_buffer, back_ground, 7750);      //设置背景
+    // display.drawString(40, 0, "16:18  25\t  80%", display.PIXEL_BLACK);
+    // display.refreshScreen();
+    char info_text[60] = {0x00};
+
     while(1)
     {
+        memcpy(IMG_buffer, back_ground, 7750);  //清空上一次的显示
         dht40.update();
-        printf("tempreature:%f,\thumidity:%f\n", dht40.aTemperature, dht40.aHumidity);
-        vTaskDelay(100);
+        sprintf(info_text, "16:18  %d\t  %d%", (int)dht40.aTemperature, (int)dht40.aHumidity);
+        info_text[14] = '%';
+        display.drawString(40, 0, info_text, display.PIXEL_BLACK);
+        display.refreshScreen();
+        vTaskDelay(1000*60);        //一分钟一次
     }
 }
 

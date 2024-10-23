@@ -12,7 +12,7 @@ void EPaperDisplay::drawString(int startX, int startY, const char* str, PixelCol
     int y = startY;
 
     while (*str) {
-        if (*str >= 0 && *str <= 255) {
+        if (*str >= 0 && *str <= 255 && *str != '\0') {
             const uint8_t (*charBitmap)[12] = font_pointers[(uint8_t)*str]; // 获取字符位图
             if (charBitmap != NULL) {
                 for (int row = 0; row < charHeight; row++) {

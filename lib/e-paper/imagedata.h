@@ -24,6 +24,7 @@
  */
 
 extern unsigned char gImage_2in13g[];
+extern unsigned char back_ground[];
 
 /* FILE END */
 
