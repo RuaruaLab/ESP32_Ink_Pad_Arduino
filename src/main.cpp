@@ -18,6 +18,8 @@ void usb_extract_handle()
 }
 
 void serial_ubpack(uint8_t *pack);
+void check_serial_data();
+void check_usb_status();
 
 void setup() {
     /*GPIO初始化*/
@@ -41,25 +43,43 @@ void setup() {
 
 void loop() {
   /*USB拔出处理*/
-  // if(sys_status == USB_EXTRACT)
-  // {
-  //   display.set(gImage_2in13g);
-  //   while(1)
-  //   {
-  //     delay(100);
-  //     if(sys_status == NORMAL) break;
-  //   }
-  // }
 
-  /*
-  通讯协议：
-  第一位  帧头 0x5C
-  第二位  数据长度，不含帧头(256以内)
-  第三位  CMD_ID
-  <数据段>
-  末位    帧尾 0x7A
-  */
-  /*接收数据包*/
+  check_usb_status();
+  check_serial_data();
+  delay(1);
+  
+}
+
+
+/*--------轮询处理USB拔出---------*/
+void check_usb_status()
+{
+  if(digitalRead(V_3125_PIN) == LOW)
+  {
+    display.set(gImage_2in13g);
+    while(1)
+    {
+      delay(100);
+      if(digitalRead(V_3125_PIN) == HIGH) break;
+    }
+  }
+}
+
+/*--------串口接收&解包部分---------*/
+//没时间就暂时先不整理
+
+/*
+通讯协议：
+第一位  帧头 0x5C
+第二位  数据长度，不含帧头(256以内)
+第三位  CMD_ID
+<数据段>
+末位    帧尾 0x7A
+*/
+
+//轮询串口数据
+void check_serial_data()
+{
   if(Serial.available() > 0){
     /*识别帧头*/
     uint8_t read_data;
@@ -78,12 +98,9 @@ void loop() {
       }
     }
   }
-  printf("no data sent\n");
-  // printf("main task ok\n");
-  delay(1);
-  
 }
 
+//解析数据包
 void serial_ubpack(uint8_t *pack)
 {
   switch (pack[0])
