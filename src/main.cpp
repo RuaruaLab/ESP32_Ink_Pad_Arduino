@@ -19,8 +19,8 @@ void check_flash_space();
 void serial_ubpack(uint8_t *pack);
 void check_serial_data();
 void check_usb_status();
-void flash_write(uint8_t *img_data);
-void flash_read(uint8_t *img_data);
+void flash_write(unsigned char *img_data);
+void flash_read(unsigned char *img_data);
 
 
 void setup() {
@@ -38,11 +38,8 @@ void setup() {
         display.setPixel(i, i, EPaperDisplay::PIXEL_RED);
     }
 
-    // while(1)
-    // {
-    //   // flash_read(gImage_2in13g);
-    //   delay(1000);
-    // }
+    //从flash中读取图片
+    flash_read(gImage_2in13g);
 }
 
 void loop() {
@@ -57,7 +54,7 @@ void loop() {
 
 
 /*--------FLASH操作---------*/
-void flash_read(uint8_t *img_data)
+void flash_read(unsigned char *img_data)
 {
   // 找到标签为 "img_data" 的分区
   const esp_partition_t* part = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, "img_data");
@@ -67,17 +64,18 @@ void flash_read(uint8_t *img_data)
   }
 
   // 从分区读取数据
-  // esp_err_t err = esp_partition_read(part, 0, &img_data, 7750);
-  // if (err != ESP_OK) {
-  //   Serial.print("Read failed: ");
-  //   Serial.println(esp_err_to_name(err));
-  //   return;
-  // }
+  esp_err_t err = esp_partition_read(part, 0, img_data, 7750);
+  if (err != ESP_OK) {
+    Serial.print("Read failed: ");
+    Serial.println(esp_err_to_name(err));
+    return;
+  }
 
+  /*DEBUG*/
   // Serial.println("Read completed successfully!");
   // Serial.println("Data read from the partition:");
 
-  // // 打印数据到串口监视器，以十六进制格式显示
+  // 打印数据到串口监视器，以十六进制格式显示
   // for (int i = 0; i < 7750; ++i) {
   //   if (i % 16 == 0) {
   //     Serial.println();
@@ -88,7 +86,7 @@ void flash_read(uint8_t *img_data)
 }
 
 
-void flash_write(uint8_t *img_data)
+void flash_write(unsigned char *img_data)
 {
   // 找到标签为 "img_data" 的分区
   const esp_partition_t* part = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, "img_data");
@@ -176,7 +174,8 @@ void serial_ubpack(uint8_t *pack)
     for(int i=0; i<64; i++) gImage_2in13g[frame_id*64 + i] = pack[i + 2];
     if(frame_id >= 0x79)
     {
-      display.set(gImage_2in13g);
+      flash_write(gImage_2in13g);   //将接收到的图片写入FLASH
+      // display.set(gImage_2in13g);
       // 调试flag
       // while(1){
       //   printf("called refresh!\n");
