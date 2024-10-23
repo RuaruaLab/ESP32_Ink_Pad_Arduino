@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include "PINOUT.h"
 #include "display.hpp"
+#include "esp_partition.h"
+#include "spi_flash_mmap.h"
+
 
 uint8_t recive_buff[256] = {0};
 
@@ -11,15 +14,14 @@ enum SystemStatus {
 };
 uint8_t sys_status = NORMAL;
 
-void usb_extract_handle()
-{
-  if(digitalRead(V_3125_PIN) == LOW) sys_status = USB_EXTRACT;
-  else if(digitalRead(V_3125_PIN) == HIGH) sys_status = NORMAL;
-}
+void check_flash_space();
 
 void serial_ubpack(uint8_t *pack);
 void check_serial_data();
 void check_usb_status();
+void flash_write(uint8_t *img_data);
+void flash_read(uint8_t *img_data);
+
 
 void setup() {
     /*GPIO初始化*/
@@ -28,17 +30,19 @@ void setup() {
     digitalWrite(LED_PIN, LOW);
     //USB拔出检测
     pinMode(V_3125_PIN, INPUT);
-    // attachInterrupt(V_3125_PIN, usb_extract_handle, CHANGE);
     /*墨水屏初始化*/
     display.begin();
     display.clearScreen(EPaperDisplay::PIXEL_WHITE);
 
     for(int i = 0; i < 124; i++) {
         display.setPixel(i, i, EPaperDisplay::PIXEL_RED);
-
     }
-    // display.refreshScreen();
-    // display.set(gImage_2in13g);
+
+    // while(1)
+    // {
+    //   // flash_read(gImage_2in13g);
+    //   delay(1000);
+    // }
 }
 
 void loop() {
@@ -50,6 +54,67 @@ void loop() {
   
 }
 
+
+
+/*--------FLASH操作---------*/
+void flash_read(uint8_t *img_data)
+{
+  // 找到标签为 "img_data" 的分区
+  const esp_partition_t* part = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, "img_data");
+  if (part == NULL) {
+    Serial.println("Partition not found!");
+    return;
+  }
+
+  // 从分区读取数据
+  // esp_err_t err = esp_partition_read(part, 0, &img_data, 7750);
+  // if (err != ESP_OK) {
+  //   Serial.print("Read failed: ");
+  //   Serial.println(esp_err_to_name(err));
+  //   return;
+  // }
+
+  // Serial.println("Read completed successfully!");
+  // Serial.println("Data read from the partition:");
+
+  // // 打印数据到串口监视器，以十六进制格式显示
+  // for (int i = 0; i < 7750; ++i) {
+  //   if (i % 16 == 0) {
+  //     Serial.println();
+  //   }
+  //   Serial.print(img_data[i], HEX);
+  //   Serial.print(" ");
+  // }
+}
+
+
+void flash_write(uint8_t *img_data)
+{
+  // 找到标签为 "img_data" 的分区
+  const esp_partition_t* part = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, "img_data");
+  if (part == NULL) {
+    Serial.println("Partition not found!");
+    return;
+  }
+
+  // 首先擦除分区
+  esp_err_t err = esp_partition_erase_range(part, 0, (7750 + SPI_FLASH_SEC_SIZE - 1) & ~(SPI_FLASH_SEC_SIZE - 1));
+  if (err != ESP_OK) {
+    Serial.print("Erase failed: ");
+    Serial.println(esp_err_to_name(err));
+    return;
+  }
+
+  // 向分区写入数据
+  err = esp_partition_write(part, 0, img_data, 7750);
+  if (err != ESP_OK) {
+    Serial.print("Write failed: ");
+    Serial.println(esp_err_to_name(err));
+    return;
+  }
+
+  Serial.println("Write completed successfully!");
+}
 
 /*--------轮询处理USB拔出---------*/
 void check_usb_status()
@@ -126,4 +191,40 @@ void serial_ubpack(uint8_t *pack)
   }
   
   return ;
+}
+
+/*--------调试工具---------*/
+
+void check_flash_space()
+{
+    delay(3000);
+    /*-----------------查看FLASH空间-----------------*/
+    // 初始化partition迭代器
+    const esp_partition_t* partition;
+    esp_partition_iterator_t iter = esp_partition_find(ESP_PARTITION_TYPE_ANY, ESP_PARTITION_SUBTYPE_ANY, NULL);
+    if (!iter) {
+      Serial.println("Failed to find partitions");
+      return;
+    }
+
+    // 遍历所有partition
+    while (iter != NULL) {
+      partition = esp_partition_get(iter);
+      Serial.print("Type: ");
+      Serial.print(partition->type, HEX);
+      Serial.print(", Subtype: ");
+      Serial.print(partition->subtype, HEX);
+      Serial.print(", Address: 0x");
+      Serial.print(partition->address, HEX);
+      Serial.print(", Size: ");
+      Serial.print(partition->size);
+      Serial.print(" bytes, Label: ");
+      Serial.println(partition->label);
+
+      // 移动到下一个partition
+      iter = esp_partition_next(iter);
+    }
+    
+    // 释放迭代器
+    esp_partition_iterator_release(iter);
 }
