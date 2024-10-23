@@ -22,7 +22,7 @@ void print_time() {
 }
 
 void config_tz() {
-    setenv("TZ", tz, 1);
+    setenv("TZ", TZ, 1);
 }
 
 void connect_wifi(char *ssid, char *password) {
