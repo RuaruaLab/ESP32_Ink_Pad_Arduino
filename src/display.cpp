@@ -33,10 +33,8 @@ void EPaperDisplay::begin()
 {
     memset(img_buffer, 0xFF, sizeof(IMG_buffer)); // 初始化为全白
     if (epd.Init() != 0) {
-        Serial.begin(9600);
         Serial.println("e-Paper init failed!");
     } else {
-        Serial.begin(9600);
         Serial.println("e-Paper init ok");
     }
 }

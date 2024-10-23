@@ -207,6 +207,8 @@ void flash_write_wifi_cfg(char *ssid, char *password) {
 /*--------轮询处理USB拔出---------*/
 void check_usb_status() {
     if (digitalRead(V_3125_PIN) == LOW) {
+        // 断开wifi多苟一会
+        WiFi.disconnect();
         display.set(gImage_2in13g);
         while (1) {
             delay(100);

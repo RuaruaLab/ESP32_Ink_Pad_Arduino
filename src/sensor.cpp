@@ -18,14 +18,15 @@ void sensor_update_task(void *pvParameters)
         memcpy(IMG_buffer, back_ground, 7750);  //清空上一次的显示
         dht40.update();
 
+        char timeStr[16];
         struct tm timeinfo;
         if (!getLocalTime(&timeinfo)) {
             Serial.println("Failed to obtain time");
-            return;
+            strcpy(timeStr, "--:--");
+        } else {
+            strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
         }
 
-        char timeStr[16];
-        strftime(timeStr, sizeof(timeStr), "%H:%M", &timeinfo);
 
         sprintf(info_text, "%s  %d\t  %d%%", timeStr, (int)dht40.aTemperature, (int)dht40.aHumidity);
         info_text[14] = '%';
