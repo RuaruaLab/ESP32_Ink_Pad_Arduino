@@ -34,10 +34,6 @@ void setup() {
     display.begin();
     display.clearScreen(EPaperDisplay::PIXEL_WHITE);
 
-    for(int i = 0; i < 124; i++) {
-        display.setPixel(i, i, EPaperDisplay::PIXEL_RED);
-    }
-
     //从flash中读取图片
     flash_read(gImage_2in13g);
 

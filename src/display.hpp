@@ -4,6 +4,8 @@
 #ifndef EPAPER_DISPLAY_HPP
 #define EPAPER_DISPLAY_HPP
 
+#include "spleen-12x24.h"
+
 extern uint8_t IMG_buffer[7750];
 
 
@@ -31,6 +33,7 @@ public:
     void clearScreen(PixelColor color);
     void refreshScreen();
     void set(const UBYTE *Image);
+    void drawString(int startX, int startY, const char* str, PixelColor color);     //绘制字符串
     void sleep();
 };
 

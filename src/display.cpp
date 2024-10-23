@@ -3,6 +3,32 @@
 uint8_t IMG_buffer[7750];            //图片缓冲区
 EPaperDisplay display(IMG_buffer);   //显示控制类
 
+
+void EPaperDisplay::drawString(int startX, int startY, const char* str, PixelColor color)
+{
+    const int charWidth = 12;  // 字符的宽度
+    const int charHeight = 24; // 字符的高度
+    int x = startX;
+    int y = startY;
+
+    while (*str) {
+        if (*str >= 0 && *str <= 255) {
+            const uint8_t (*charBitmap)[12] = font_pointers[(uint8_t)*str]; // 获取字符位图
+            if (charBitmap != NULL) {
+                for (int row = 0; row < charHeight; row++) {
+                    for (int col = 0; col < charWidth; col++) {
+                        if (charBitmap[row][col]) {  // 如果位图中该位为1，则绘制像素
+                            setPixel(y + charHeight - 1 - row, x + col, color); // 翻转行的顺序
+                        }
+                    }
+                }
+            }
+            x += charWidth;  // 移动到下一个字符的起始位置
+        }
+        str++;  // 移动到下一个字符
+    }
+}
+
 void EPaperDisplay::begin()
 {
     memset(img_buffer, 0xFF, sizeof(IMG_buffer)); // 初始化为全白
